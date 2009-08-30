@@ -65,6 +65,30 @@ class CssTidy
             { $this->options['definition_indent'] += $this->options['selector_width']; }
 	}
 
+    function loadOptions($options = array())
+    {
+        /* Function: loadOptions()
+         * Loads options that are in the associative array.
+         *
+         * Description:
+         *   To be documented.
+         */
+    
+        return;
+    }
+
+    function loadPreset($preset = '')
+    {
+        /* Function: loadPreset()
+         * Loads a certain preset name.
+         *
+         * Description:
+         *   To be documented.
+         */
+    
+        return;
+    }
+
 	function _parse($in)
 	{
 		/* Function: _parse()
@@ -382,9 +406,51 @@ class CtCLI
         }
         return $output;
     }
+
+    function go()
+    {
+        /* Function: go()
+         * To be documented.
+         *
+         * Description:
+         *   To be documented.
+         */
+        array_shift($_SERVER['argv']);
+        $args = $this->parseArgs($_SERVER['argv']);
+        if ((isset($args['help'])) || (count($_SERVER['argv']) == 0))
+        {
+            $css = new CssTidy(''); 
+            echo "I need somebody, help! Not just anyone but help!\n";
+            echo "Usage: csstidy [preset=<preset>] [-debug] [OPTIONS]\n\n";
+            echo "  preset=<preset>                   Yes\n";
+            echo "\n";
+            echo "Options:\n";
+            foreach ($css->options as $o => $value)
+            {
+                $count = 31 - strlen($o);
+                if ($count < 0) { $count = 0; }
+                echo "  $o=<val>" . str_repeat(' ', $count) . " I dunno\n";
+            }
+            return;
+        }
+
+        $input = file_get_contents('php://stdin');
+        $css = new CssTidy($input);
+
+        if (isset($args['preset']))
+            { $css->loadPreset($args['preset']); unset($args['preset']); }
+
+        $action = 'printout';
+        if (isset($args['debug']))
+            { $action = 'debug'; unset($args['debug']); }
+
+        if (count($args > 0))
+            { $css->loadOptions($args); } 
+
+        // Do it!
+        $css->{$action}();
+    }
 }
 
-$input = file_get_contents('php://stdin');
-$css = new CssTidy($input);
-//$css->debug();
-$css->printout();
+$c = new CtCLI();
+$c->go();
