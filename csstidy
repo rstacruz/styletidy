@@ -34,7 +34,11 @@ class CssTidy
         // is set to anything else other than 0. The reason for this is that a word
         // wrap is forced when `selection_width` is > 0.
         'definition_newlines' => 1,
-		'property_separator' => ' ',
+        // Compact the properties (e.g.: "a: b; c: d" vs. "a:b;c:d")
+        'property_compact' => FALSE,
+        // Should definitions be all in a single line (if possible), or one on it's own line?
+        // (kulang pa ng indentation)
+        'single_line_definitions' => TRUE,
 		'definition_trailing_semicolon' => TRUE,
 		'definition_start' => ' ',
 		'definition_end' => ' ',
@@ -258,12 +262,26 @@ class CssTidy
 				foreach ($line['data'] as $property => $value)
 				{
 					$last = (++$i == count($line['data'])) ? TRUE : FALSE;
-					$this->e($property . ': ' . $value);
-					if ((!$last) || ($this->options['definition_trailing_semicolon']))
-					    { $this->e(';'); }
 
-					if (!$last)
-						{ $this->e($this->options['property_separator']); }
+                    // Should it be "a:b" or "a: b"?
+                    $colon = ($this->options['property_compact']) ? ':' : ': ';
+					$this->e($property . $colon . $value);
+
+                    // Add in the terminator; but take trailing_semi into account
+                    // (i.e.: don't add the last ; if the options say so)
+                    if ((!$last) || ($this->options['definition_trailing_semicolon']))
+                        { $this->e(';'); }
+
+                    if (!$last)
+                    {
+                        if (!$this->options['single_line_definitions'])
+                        {
+                            $this->e("\n");
+                        }
+                        // Separate each with a space
+                        elseif (!$this->options['property_compact'])
+                            { $this->e(' '); }
+                    }
 				}
 				$this->e($this->options['definition_end']);
 				$this->e('}');
