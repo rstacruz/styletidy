@@ -36,6 +36,30 @@ class CssTidy
         // Should selector and definition be on their own lines?
         // If set to false, this cancels out `selector_padding`.
         'single_line_rules' => FALSE,
+        // NI: Kailangan ng property na magdedefine ng brace style. Madedeprecate neto yung
+        // single_line_rules
+        // [ compact | ownline | ansi | standard ]
+        /*
+         * Standard:
+         *     foo {
+         *       bar
+         *     }
+         *
+         * Compact:
+         *     foo { bar }
+         *
+         * Ownline:
+         *     foo
+         *     { bar }
+         *
+         * ansi:
+         *     foo
+         *     {
+         *        bar
+         *     }
+         */
+        'brace_style' => 'standard',
+
         // How many new lines after a definition
         // Note: if set to 0, it may not work as you would expect if 'selector_width'
         // is set to anything else other than 0. The reason for this is that a word
@@ -51,20 +75,23 @@ class CssTidy
         // to account for `selector_width`.
         'definition_indent' => 3,
 		'definition_trailing_semicolon' => TRUE,
-		'definition_pre' => ' ',
+		'brace_spaces_before' => 1,
     );
 
     var $presets = array(
-        'compressed' => array(
+        'compress' => array(
             'text_width' => 0,
             'show_comments' => FALSE,
             'selector_width' => 0,
             'selector_compact' => TRUE,
+            'selector_newline' => FALSE,
             'single_line_rules' => TRUE,
             'property_compact' => TRUE,
             'single_line_definitions' => TRUE,
 		    'definition_trailing_semicolon' => FALSE,
             'definition_newlines' => 0,
+            'brace_spaces_before' => 1,
+            'brace_style' => 'compact',
         ),
         'clean' => array(
             'text_width' => 120,
@@ -76,6 +103,7 @@ class CssTidy
             'single_line_rules' => TRUE,
             'single_line_definitions' => TRUE,
             'definition_newlines' => 1,
+            'brace_style' => 'compact',
         ),
     );
 
@@ -353,7 +381,7 @@ class CssTidy
 			// Definition
 			elseif ($line['type'] == 'definition')
 			{
-				$this->e($this->options['definition_pre']);
+				$this->e(str_repeat(' ', $this->options['brace_spaces_before']));
 				$this->e('{');
                 if (!$this->options['property_compact'])
                     { $this->e(' '); }
