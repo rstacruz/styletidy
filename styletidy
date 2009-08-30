@@ -1,8 +1,8 @@
 #!/usr/bin/php
 <?php
-class CssTidy
+class StyleTidy
 {
-	/* Class: CssTidy
+	/* Class: StyleTidy
 	 * CSS parser class.
 	 */
 
@@ -23,14 +23,16 @@ class CssTidy
         // if `selector_padding` is set, How much to pad after selector ("td     ")
         // If `selector_conservative_newline` is set, the maximum width of selectors
         // before putting the next ones in a new line
-		'selector_width' => 0,
+		'selector_width' => 50,
         'selector_indent' => 2,
         // If the end of the selectors will be padded with spaces (e.g.: "td      ") 
         'selector_padding' => TRUE,
 		// New lines in between selectors? (e.g.: "form, td" vs. "form,\ntd")
 		'selector_newline' => TRUE,
         // New lines after each selector only if it's less than selector_width?
-        'selector_conservative_newline' => FALSE,
+        // This helps on selectors such as "td, tr, tbody, thead" where it may look weird
+        // if each element is placed on it's own line.
+        'selector_conservative_newline' => TRUE,
 		// Spaces in between selectors? (e.g., "form, td" vs. "form,td")
 		'selector_compact' => FALSE,
         // Should selector and definition be on their own lines?
@@ -75,6 +77,8 @@ class CssTidy
         // to account for `selector_width`.
         'definition_indent' => 3,
 		'definition_trailing_semicolon' => TRUE,
+        // Describes how many spaces to place before an opening brace.
+        // (e.g.: the space after the selector in "div { color: red }")
 		'brace_spaces_before' => 1,
     );
 
@@ -107,7 +111,7 @@ class CssTidy
         ),
     );
 
-	function CssTidy($str, $options = array())
+	function StyleTidy($str, $options = array())
 	{
 		$this->css  = (string) $str;
 		$this->data = $this->_parse($this->css);
@@ -341,11 +345,11 @@ class CssTidy
 
                     if (!$first)
                     {
-                        if ((boolean) $this->options['selector_conservative_newline'])
+                        if ($this->options['selector_conservative_newline'])
                         {
                             $width = $this->options['text_width'];
                             if (($this->options['selector_width'] > 0) &&
-                                ($this->options['selector_width'] < $width))
+                                (($width == 0) || ($this->options['selector_width'] < $width)))
                                 { $width = $this->options['selector_width']; }
 
                             if ($this->caret + strlen($selector) > $width)
@@ -354,9 +358,9 @@ class CssTidy
                                 { $this->e(" "); }
                         }
 
-                        elseif ((boolean) $this->options['selector_newline'])
+                        elseif ($this->options['selector_newline'])
                             { $this->e("\n"); }
-                        elseif (!((boolean) $this->options['selector_compact']))
+                        elseif (!$this->options['selector_compact'])
 							{ $this->e(" "); }
                     }
 
@@ -439,7 +443,7 @@ class CssTidy
 	}
 }
 
-class CtCLI
+class StCLI
 {
     function parseArgs($argslist)
     {
@@ -503,7 +507,7 @@ class CtCLI
         $args = $this->parseArgs($_SERVER['argv']);
         if (isset($args['help']))
         {
-            $css = new CssTidy(''); 
+            $css = new StyleTidy(''); 
             echo "I need somebody, help! Not just anyone but help!\n";
             echo "Usage: csstidy [preset=<preset>] [-debug] OPTIONS]\n\n";
             echo "  preset=<preset>                   Yes\n";
@@ -519,7 +523,7 @@ class CtCLI
         }
 
         $input = file_get_contents('php://stdin');
-        $css = new CssTidy($input);
+        $css = new StyleTidy($input);
 
         if (isset($args['preset']))
             { $css->loadPreset($args['preset']); unset($args['preset']); }
@@ -536,5 +540,5 @@ class CtCLI
     }
 }
 
-$c = new CtCLI();
+$c = new StCLI();
 $c->go();
