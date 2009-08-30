@@ -13,7 +13,7 @@ class CssTidy
 
 	var $options = array
 	(
-		'text_width' => 120,
+		'text_width' => 0,
         // Show comments?
         'show_comments' => TRUE,
         // How many new lines before comments?
@@ -23,42 +23,70 @@ class CssTidy
         // if `selector_padding` is set, How much to pad after selector ("td     ")
         // If `selector_conservative_newline` is set, the maximum width of selectors
         // before putting the next ones in a new line
-		'selector_width' => 24,
+		'selector_width' => 0,
         'selector_indent' => 2,
         // If the end of the selectors will be padded with spaces (e.g.: "td      ") 
         'selector_padding' => TRUE,
 		// New lines in between selectors? (e.g.: "form, td" vs. "form,\ntd")
 		'selector_newline' => TRUE,
         // New lines after each selector only if it's less than selector_width?
-        'selector_conservative_newline' => TRUE,
+        'selector_conservative_newline' => FALSE,
 		// Spaces in between selectors? (e.g., "form, td" vs. "form,td")
 		'selector_compact' => FALSE,
         // Should selector and definition be on their own lines?
         // If set to false, this cancels out `selector_padding`.
-        'single_line_rules' => TRUE,
+        'single_line_rules' => FALSE,
         // How many new lines after a definition
         // Note: if set to 0, it may not work as you would expect if 'selector_width'
         // is set to anything else other than 0. The reason for this is that a word
         // wrap is forced when `selection_width` is > 0.
-        'definition_newlines' => 1,
+        'definition_newlines' => 2,
         // Compact the properties (e.g.: "a: b; c: d" vs. "a:b;c:d")
         'property_compact' => FALSE,
         // Should definitions be all in a single line (if possible), or one on it's own line?
         // This is going to be wordwrapped according to `text_width` and `definition_indent`.
-        'single_line_definitions' => TRUE,
+        'single_line_definitions' => FALSE,
         // How many spaces to indent the word-wrapped definitions.
         // If `selector_padding` and `single_line_rules` are on, then this will be adjusted
         // to account for `selector_width`.
         'definition_indent' => 3,
 		'definition_trailing_semicolon' => TRUE,
 		'definition_pre' => ' ',
-	);
+    );
+
+    var $presets = array(
+        'compressed' => array(
+            'text_width' => 0,
+            'show_comments' => FALSE,
+            'selector_width' => 0,
+            'selector_compact' => TRUE,
+            'single_line_rules' => TRUE,
+            'property_compact' => TRUE,
+            'single_line_definitions' => TRUE,
+		    'definition_trailing_semicolon' => FALSE,
+            'definition_newlines' => 0,
+        ),
+        'clean' => array(
+            'text_width' => 120,
+            'selector_width' => 24,
+            'selector_indent' => 2,
+            'selector_padding' => TRUE,
+            'selector_newline' => TRUE,
+            'selector_conservative_newline' => TRUE,
+            'single_line_rules' => TRUE,
+            'single_line_definitions' => TRUE,
+            'definition_newlines' => 1,
+        ),
+    );
 
 	function CssTidy($str, $options = array())
 	{
 		$this->css  = (string) $str;
 		$this->data = $this->_parse($this->css);
+    }
 
+    function _cleanupOptions()
+    {
         // If rules and definitions are in the own line, and selector_padding is on,
         // Adjust the definition_indent accordingly
         if (($this->options['selector_padding']) && ($this->options['single_line_rules']))
@@ -74,6 +102,16 @@ class CssTidy
          *   To be documented.
          */
     
+        foreach ($this->options as $k => $v)
+        {
+            if (!isset($options[$k])) { continue; }
+            $value = $options[$k];
+            if (is_string($v)) { $value = (string) $value; }
+            if (is_int($v))    { $value = (int)    $value; }
+            if (is_bool($v))   { $value = (bool)   $value; }
+            $this->options[$k] = $value;
+        }
+
         return;
     }
 
@@ -85,8 +123,21 @@ class CssTidy
          * Description:
          *   To be documented.
          */
-    
+
+        $preset = (string) $preset;
+        if (!isset($this->presets[$preset]))
+            { return; }
+
+        $this->loadOptions($this->presets[$preset]);
         return;
+    }
+
+    function prepare()
+    {
+        static $f; if ($f) { return $f; }
+        $f = NULL;
+        $this->_cleanupOptions();
+        return $f;
     }
 
 	function _parse($in)
@@ -229,6 +280,11 @@ class CssTidy
 		 * Description:
 		 *   To be documented.
 		 */
+
+        // Do preparation (e.g., make sure options are all okay). This
+        // will only be done once, even if printout() is called multiple
+        // times.
+        $this->prepare();
 	
 		foreach ($this->data as $line)
 		{
@@ -417,11 +473,11 @@ class CtCLI
          */
         array_shift($_SERVER['argv']);
         $args = $this->parseArgs($_SERVER['argv']);
-        if ((isset($args['help'])) || (count($_SERVER['argv']) == 0))
+        if (isset($args['help']))
         {
             $css = new CssTidy(''); 
             echo "I need somebody, help! Not just anyone but help!\n";
-            echo "Usage: csstidy [preset=<preset>] [-debug] [OPTIONS]\n\n";
+            echo "Usage: csstidy [preset=<preset>] [-debug] OPTIONS]\n\n";
             echo "  preset=<preset>                   Yes\n";
             echo "\n";
             echo "Options:\n";
