@@ -9,10 +9,17 @@ class CssTidy
 	var $css;
 	var $data;
     var $caret = 0;
+    var $output;
 
 	var $options = array
 	(
 		'text_width' => 120,
+        // Show comments?
+        'show_comments' => TRUE,
+        // How many new lines before comments?
+        'comment_newlines_before' => 1,
+        // New lines after comments?
+        'comment_newlines_after' => 1,
         // if `selector_padding` is set, How much to pad after selector ("td     ")
         // If `selector_conservative_newline` is set, the maximum width of selectors
         // before putting the next ones in a new line
@@ -162,6 +169,7 @@ class CssTidy
 
         // Finally print it out
 		print $str;
+        $this->output .= $str;
 
         // Predict where the caret is.
         $e = explode("\n", $str);
@@ -169,7 +177,6 @@ class CssTidy
             { $this->caret = strlen($e[count($e)-1]); }
         else
             { $this->caret += strlen($e[0]); }
-        
 	}
 
 	function pad($size)
@@ -204,9 +211,14 @@ class CssTidy
 			// Comment
 			if ($line['type'] == 'comment')
 			{
-				$this->e("\n");
+                if (!$this->options['show_comments'])
+                    { continue; }
+
+                if ($this->output != '')
+                    { $this->e(str_repeat("\n", $this->options['comment_newlines_before'])); }
+
 				$this->e($line['comment']);
-				$this->e("\n");
+                $this->e(str_repeat("\n", $this->options['comment_newlines_after']));
 			}
 
 			// Selector
@@ -317,6 +329,59 @@ class CssTidy
 			}
 		}
 	}
+}
+
+class CtCLI
+{
+    function parseArgs($argslist)
+    {
+        /* Function: parseArgs()
+         * Parses command-line arguments into an associative array.
+         * 
+         * Usage:
+         *     parseArgs(array $argslist)
+         *
+         *   The input expected is expected to be from `$_SERVER['argv']`,
+         *   an array of strings, with each item being a single argument.
+         * 
+         * Example:
+         *   It takes an input array (in `argv` format) in the likes of: 
+         * 
+         *     Array (
+         *       [0] => "-verbose",
+         *       [1] => "remote=127.0.0.1 24",
+         *       [2] => "ftp.remote.org"
+         *       [3] => "localhost"
+         *     ) 
+         *
+         *   And outputs an array in the format: 
+         * 
+         *     Array (
+         *       [verbose]   => TRUE,
+         *       [remote]    => "127.0.0.1 24",
+         *       [arguments] => array( "ftp.remote.org", "localhost" )
+         *     )
+         * 
+         */
+
+        $output = array();
+        $output['args'] = array();
+        foreach ($argslist as $args)
+        {
+            $flag  = '(?:-(?<flag>[a-zA-Z0-9\-\_]+))';
+            $kv    = '(?<kv>(?:[a-zA-Z0-9\-\_]+)=(?:.*))';
+            $word  = '(?:(?<word>.*))';
+            preg_match_all("~^$flag|$kv|$word\$~", $args, $m);
+        
+            foreach ($m['flag'] as $flag) if ($flag != '')
+                { $output[$flag] = TRUE; }
+            foreach ($m['kv'] as $str) if ($str != '')
+                { $output[substr($str,0,strpos($str, '='))] = substr($str,strpos($str, '=')+1); }
+            foreach ($m['word'] as $str) if ($str != '')
+                { $output['args'][] = $str; }
+        }
+        return $output;
+    }
 }
 
 $input = file_get_contents('php://stdin');
