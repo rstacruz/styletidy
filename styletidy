@@ -17,9 +17,9 @@ class StyleTidy
         // Show comments?
         'show_comments' => TRUE,
         // How many new lines before comments?
-        'comment_newlines_before' => 1,
+        'comment_newlines_before' => 0,
         // New lines after comments?
-        'comment_newlines_after' => 1,
+        'comment_newlines_after' => 2,
         // if `selector_padding` is set, How much to pad after selector ("td     ")
         // If `selector_conservative_newline` is set, the maximum width of selectors
         // before putting the next ones in a new line
@@ -40,7 +40,7 @@ class StyleTidy
         'single_line_rules' => FALSE,
         // NI: Kailangan ng property na magdedefine ng brace style. Madedeprecate neto yung
         // single_line_rules
-        // [ compact | ownline | ansi | standard ]
+        // [ compact | ownline | ansi | standard | whitesmith | banner ]
         /*
          * Standard:
          *     foo {
@@ -82,10 +82,13 @@ class StyleTidy
 		'brace_spaces_before' => 1,
     );
 
-    var $presets = array(
-        'compress' => array(
+    var $presets = array
+    (
+        'compress' => array
+        (
             'text_width' => 0,
             'show_comments' => FALSE,
+            'selector_conservative_newline' => FALSE,
             'selector_width' => 0,
             'selector_compact' => TRUE,
             'selector_newline' => FALSE,
@@ -94,10 +97,13 @@ class StyleTidy
             'single_line_definitions' => TRUE,
 		    'definition_trailing_semicolon' => FALSE,
             'definition_newlines' => 0,
-            'brace_spaces_before' => 1,
+            'brace_spaces_before' => 0,
             'brace_style' => 'compact',
         ),
-        'clean' => array(
+        'clean' => array
+        (
+            'comment_newlines_before' => 1,
+            'comment_newlines_after' => 1,
             'text_width' => 120,
             'selector_width' => 24,
             'selector_indent' => 2,
@@ -113,6 +119,10 @@ class StyleTidy
 
 	function StyleTidy($str, $options = array())
 	{
+        /* Function: StyleTidy()
+         * Constructor.
+         */
+
 		$this->css  = (string) $str;
 		$this->data = $this->_parse($this->css);
     }
@@ -180,7 +190,7 @@ class StyleTidy
 
 		$comment = '/\*.*?\*/';
 		$def = '{.*?}';
-		$sc = 'A-Za-z0-9\-_#\.,:\[\]=';
+		$sc = 'A-Za-z0-9\-_#\.,:\[\]\(\)\*=';
 		$selector = "[$sc \r\t\n]*(?={)";
 		preg_match_all("~($comment)|($def)|($selector)~s", $in, $m);
 		$result = array();
@@ -220,7 +230,7 @@ class StyleTidy
 				{
 					$selector = trim($selector);
 					if ($selector == '') { continue; }
-					preg_match_all('~([a-zA-Z0-9\-_#\.:\[\]\(\)]+)~', $selector, $mm);
+					preg_match_all('~(['.$sc.']+)~', $selector, $mm);
 					$selector = implode(' ', $mm[0]);
 					$item['selectors'][] = $selector;
 				}
@@ -480,8 +490,8 @@ class StCLI
         $output['args'] = array();
         foreach ($argslist as $args)
         {
-            $flag  = '(?:-(?<flag>[a-zA-Z0-9\-\_]+))';
-            $kv    = '(?<kv>(?:[a-zA-Z0-9\-\_]+)=(?:.*))';
+            $flag  = '(?:--?(?<flag>[a-zA-Z0-9\-\_]+))';
+            $kv    = '(?:(?<kv>(?:[a-zA-Z0-9\-\_]+)=(?:.*)))';
             $word  = '(?:(?<word>.*))';
             preg_match_all("~^$flag|$kv|$word\$~", $args, $m);
         
@@ -503,6 +513,7 @@ class StCLI
          * Description:
          *   To be documented.
          */
+
         array_shift($_SERVER['argv']);
         $args = $this->parseArgs($_SERVER['argv']);
         if (isset($args['help']))
@@ -510,7 +521,10 @@ class StCLI
             $css = new StyleTidy(''); 
             echo "I need somebody, help! Not just anyone but help!\n";
             echo "Usage: csstidy [preset=<preset>] [-debug] OPTIONS]\n\n";
-            echo "  preset=<preset>                   Yes\n";
+            foreach ($css->presets as $preset => $v)
+            {
+                echo "  preset=$preset\n";
+            }
             echo "\n";
             echo "Options:\n";
             foreach ($css->options as $o => $value)
