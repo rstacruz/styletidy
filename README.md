@@ -9,10 +9,23 @@ It turns any valid CSS code like:
       clear: left; position:   absolute;
       }
 
-Into something cleaner:
+Into something cleaner (the `clean` preset):
 
     #search #header          { color: red; background: #ff0; }
     .item h3                 { clear: left; position: absolute; }
+
+Or even (the `verbose` preset):
+
+    #search #header {
+       color:       red;
+       background:  #ff0;
+    }
+
+    .item h3 {
+       clear:       left;
+       position:    absolute;
+    }
+
 
 Many options are available so you can format your CSS code into any
 coding/intent convention you're used to.
