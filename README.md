@@ -1,20 +1,21 @@
 StyleTidy
 =========
 
-StyleTidy is a CSS file reformatter written by Rico Sta. Cruz.
-It turns any valid CSS code like: 
+StyleTidy is a CSS file reformatter written by Rico Sta. Cruz,
+released under the MIT license.
+It takes any valid CSS code such as the one below: 
 
     #search
     #header { color: red; background: #ff0;} .item h3 {
       clear: left; position:   absolute;
       }
 
-Into something cleaner (the `clean` preset):
+And turns it into something cleaner (the `clean` preset shown below):
 
     #search #header          { color: red; background: #ff0; }
     .item h3                 { clear: left; position: absolute; }
 
-Or even (the `verbose` preset):
+Or even perhaps (the `verbose` preset shown below):
 
     #search #header {
        color:       red;
@@ -27,13 +28,13 @@ Or even (the `verbose` preset):
     }
 
 Many options are available so you can format your CSS code into any
-coding/intent convention you're used to.
+common coding and indentation style.
 
 Installation
 ------------
 
 First, download StyleTidy. You can get it from the StyleTidy
-(GitHub page)[http://github.com/rstacruz/styletidy/tree/master], or
+[GitHub page](http://github.com/rstacruz/styletidy/tree/master), or
 cloning the repository via git:
 
     git clone git://github.com/rstacruz/styletidy.git

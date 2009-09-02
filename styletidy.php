@@ -7,6 +7,15 @@
  *
  * Usage:
  *     styletidy [OPTIONS]
+ *
+ *   Refer to `styletidy --help` for a detailed list of options.
+ *
+ * Examples:
+ *   This example takes a CSS document `style.css` and cleans it up. The 
+ *   clean version will be saved to `style2.css`.
+ *
+ *     cat style.css | styletidy preset=clean > style2.css
+ *
  */
 /* ======================================================================== */
 
@@ -34,6 +43,23 @@ class StSettings
          *   Settings this to a number greater than `0` will do word-wrapping when
          *   necessary; and setting this to `0` disables word-wrapping.
          *
+         * Example:
+         *   Below is sample output from running
+         *   `styletidy preset=singleline text_width=80`.
+         *   The [[singleline]] preset defaults to a [[text_width]] of `0` (no
+         *   word-wrapping), so setting [[text_width]] in this case will enable
+         *   word-wrapping.
+         *
+         *     #results-c { width: 800px; margin: 0 auto; }
+         *     #results-c h3 { overflow: hidden; border-bottom: dotted 1px #777;
+         *        padding-bottom: 10px; line-height: 1.4em; }
+         *     #results-c h3 strong { float: left; display: block; width: 12%;
+         *        padding-right: 10px; font-size: 0.8em; text-transform: uppercase;
+         *        line-height: 1.4em; padding-top: 4px; text-align: right; color: #333; }
+         *     #results-c h3 span { float: left; color: #777; display: block; width: 80%;
+         *        border-left: dotted 1px #777; padding-left: 10px; font-weight: normal; }
+         *     #results-c h3 em { color: #666; font-style: normal; font-weight: bold; }
+         *
          * [Grouped under "General options"]
          */
         'text_width' => 0,
@@ -51,12 +77,45 @@ class StSettings
         /* Option: comment_newlines_before
          *   Integer. Refers to how many new lines to add before a comment.
          *
+         * Example:
+         *   Below is sample output from running `styletidy preset=singleline
+         *   comment_newlines_before=2 comment_newlines_after=2`.
+         *
+         *     #results-c h3 span { float: left; color: #777; display: block; font-weight: normal; }
+         *     #results-c h3 em { color: #666; font-style: normal; font-weight: bold; }
+         *     
+         *     
+         *     /* Results: item * /
+         *     
+         *     #results .item { width: 18%; margin: 0 1%; text-align: center; float: left; }
+         *     #results .item a { font-size: 1.1em; line-height: 1.3em; display: block; }
+         *     #results .item a .title { display: block; }
+         *
+         *   Below is sample output from running `styletidy preset=singleline
+         *   comment_newlines_before=0 comment_newlines_after=1`.
+         *
+         *     #results-c h3 span { float: left; color: #777; display: block; font-weight: normal; }
+         *     #results-c h3 em { color: #666; font-style: normal; font-weight: bold; }
+         *     /* Results: item * /
+         *     #results .item { width: 18%; margin: 0 1%; text-align: center; float: left; }
+         *     #results .item a { font-size: 1.1em; line-height: 1.3em; display: block; }
+         *     #results .item a .title { display: block; }
+         *
+         * See also:
+         * - [[comment_newlines_after]]
+         *
          * [Grouped under "Comment options"]
          */
         'comment_newlines_before' => 0,
 
         /* Option: comment_newlines_after
          *   Integer. Refers to how many new lines to add after a comment.
+         *
+         * Example:
+         *   See [[comment_newlines_before]] for a detailed example.
+         *  
+         * See also:
+         * - [[comment_newlines_before]]
          *
          * [Grouped under "Comment options"]
          */
@@ -146,59 +205,119 @@ class StSettings
          */
         'selector_conservative_newline' => TRUE,
 
-        // Spaces in between selectors? (e.g., "form, td" vs. "form,td")
+        /* Option: selector_compact
+         *   Boolean. Add spaces in between selectors? (e.g., "form, td" vs. "form,td")
+         *
+         * [Grouped under "Selector options"]
+         */
         'selector_compact' => FALSE,
 
         /* Option: brace_style
-         * Le awesome.
+         *   String. Defines the brace/indentation style for the document.
          *
-         * Valid values:
-         *     compact | ownline | ansi | standard | whitesmith | banner 
+         * Description:
+         *   Valid values are `compact`, `ownline`, `ansi` and `standard` (the default).
          *
-         * Examples:
+         * Standard style:
+         *   When set to `standard`, the indentation follows the typical style: 
          *
-         * Standard: 
          *     foo {
          *       bar
          *     }
          *
-         * Compact: 
-         *     foo { bar }
-         *
-         * Ownline: 
+         * Own-line style:
+         *   When set to `ownline`, the number of spaces that will precede each opening
+         *   brace will be defined by [[definition_indent]].
+         *        
          *     foo
          *     { bar }
          *
-         * ansi: 
+         * Compact style:
+         *   When set to `compact`, ...
+         *
+         *     foo { bar }
+         *
+         * ANSI style:
+         *   When set to `ansi`, ...
+         *
          *     foo
          *     {
          *        bar
          *     }
+         *
+         * Future:
+         *   In the future, `whitesmith` and `banner` will be implemented. 
+         *
+         * See also:
+         * - [[definition_indent]]
+         * - [[single_line_definitions]] (`compact` works best when this is set to `1`.)
+         *
          */
         'brace_style' => 'standard',
 
-        // How many new lines after a definition
-        // Note: if set to 0, it may not work as you would expect if 'selector_width'
-        // is set to anything else other than 0. The reason for this is that a word
-        // wrap is forced when `selection_width` is > 0.
+        /* Option: definition_newlines
+         *   Integer. Refers to how many new lines will be added after a definition's
+         *   closing brace.
+         *
+         * Description:
+         * Note: if set to 0, it may not work as you would expect if 'selector_width'
+         * is set to anything else other than 0. The reason for this is that a word
+         * wrap is forced when `selection_width` is > 0.
+         *
+         * [Grouped under "Definition options"]
+         */
         'definition_newlines' => 2,
 
-        // Compact the properties (e.g.: "a: b; c: d" vs. "a:b;c:d")
+        /* Option: property_compact
+         *   Boolean. Properties will have minimal whitespace when this is set to `1`.
+         *
+         * Description:
+         *   Compact the properties (e.g.: "a: b; c: d" vs. "a:b;c:d")
+         *
+         * [Grouped under "Definition options"]
+         */
         'property_compact' => FALSE,
 
-        // Should definitions be all in a single line (if possible), or one on it's own line?
-        // This is going to be wordwrapped according to `text_width` and `definition_indent`.
+        /* Option: single_line_definitions
+         *   Boolean. Each definition will be placed on it's own line if this is set to `0`.
+         *
+         * Description:
+         * Should definitions be all in a single line (if possible), or one on it's own line?
+         * This is going to be wordwrapped according to `text_width` and `definition_indent`.
+         *
+         * [Grouped under "Definition options"]
+         */
         'single_line_definitions' => FALSE,
 
-        // How many spaces to indent the word-wrapped definitions.
-        // If `selector_padding` is on and `brace_style` is set to `compact`, then this will be adjusted
-        // to account for `selector_width`.
+        /* Option: definition_indent
+         *   Integer.
+         *
+         * Description:
+         *   How many spaces to indent the word-wrapped definitions.
+         *   If `selector_padding` is on and `brace_style` is set to `compact`, then this will be adjusted
+         * to account for `selector_width`.
+         *
+         * [Grouped under "Definition options"]
+         */
         'definition_indent' => 3,
 
+        /* Option: definition_trailing_semicolon
+         *   Boolean. If set to `0`, the optional final semicolon before the closing
+         *   brace will be omitted.
+         *
+         * [Grouped under "Definition options"]
+         */
         'definition_trailing_semicolon' => TRUE,
 
-        // Describes how many spaces to place before an opening brace.
-        // (e.g.: the space after the selector in "div { color: red }")
+        /* Option: brace_spaces_before
+         *   Integer. Defines how many spaces will be placed before an opening brace.
+         *
+         * Description:
+         * Describes how many spaces to place before an opening brace.
+         * (e.g.: the space after the selector in `div { color: red }`)
+         *
+         * [Grouped under "Definition options"]
+         */
         'brace_spaces_before' => 1,
     );
 
@@ -213,7 +332,12 @@ class StSettings
     var $presets = array
     (
         /* Preset: compress
-         * Compresses CSS files to have the least amount of whitespaces possible.
+         *   Compresses CSS files to have the least amount of whitespace possible.
+         *
+         * Example:
+         *   This is an example of using `styletidy preset=compress`.
+         *
+         *     #search p{color:#f00;background:transparent}ul,li,ol{margin:0;padding:0}
          */
         'compress' => array
         (
@@ -223,7 +347,6 @@ class StSettings
             'selector_width' => 0,
             'selector_compact' => TRUE,
             'selector_newline' => FALSE,
-            'single_line_rules' => TRUE,
             'property_compact' => TRUE,
             'single_line_definitions' => TRUE,
 		    'definition_trailing_semicolon' => FALSE,
@@ -233,7 +356,26 @@ class StSettings
         ),
 
         /* Preset: singleline
-         * Awesome
+         * Lines up rules to occupy only one line each with just enough amount of whitespace.
+         *
+         * Example:
+         *   This is an example output of `styletidy preset=singleline`.
+         *
+         *     /* Results * /
+         *     #results-c { width: 800px; margin: 0 auto; }
+         *     #results-c h3 { overflow: hidden; border-bottom: dotted 1px #777; padding-bottom: 10px; line-height: 1.4em; }
+         *     #results-c h3 strong { float: left; display: block; width: 12%; padding-right: 10px; font-size: 0.8em; text-transform: uppercase; line-height: 1.4em; padding-top: 4px; text-align: right; color: #333; }
+         *     #results-c h3 span { float: left; color: #777; display: block; width: 80%; border-left: dotted 1px #777; padding-left: 10px; font-weight: normal; }
+         *     #results-c h3 em { color: #666; font-style: normal; font-weight: bold; }
+         *     
+         *     /* Results: item * /
+         *     #results .item { width: 18%; margin: 0 1%; text-align: center; float: left; }
+         *     #results .item a { font-size: 1.1em; line-height: 1.3em; display: block; }
+         *     #results .item a .title { display: block; }
+         * 
+         * Customizations:
+         *   - You can conserve whitespace If [[selector_compact]] is set to `0`.  
+         *     Example output: `#results-c {width:800px;margin:0 auto;}`
          */
         'singleline' => array
         (
@@ -245,14 +387,32 @@ class StSettings
             'selector_padding' => TRUE,
             'selector_newline' => TRUE,
             'selector_conservative_newline' => TRUE,
-            'single_line_rules' => TRUE,
             'single_line_definitions' => TRUE,
             'definition_newlines' => 1,
             'brace_style' => 'compact',
         ),
 
         /* Preset: clean
-         * Nice
+         * A compact look with the selectors and definitions segregated into columns.
+         *
+         * Example:
+         *   This is an example output of `styletidy preset=clean`.
+         *
+         *     /* Item: description * /
+         *     .description             { padding-bottom: 10px; }
+         *     
+         *     /* Results * /
+         *     #results-c               { width: 800px; margin: 0 auto; }
+         *     #results-c h3            { overflow: hidden; border-bottom: dotted 1px #777; padding-bottom: 10px; line-height: 1.4em; }
+         *     #results-c h3 strong     { float: left; display: block; width: 12%; padding-right: 10px; font-size: 0.8em;
+         *                                text-transform: uppercase; line-height: 1.4em; padding-top: 4px; text-align: right; color: #333; }
+         *     #results-c h3 span       { float: left; color: #777; display: block; width: 80%; border-left: dotted 1px #777;
+         *                                padding-left: 10px; font-weight: normal; }
+         *     #results-c h3 em         { color: #666; font-style: normal; font-weight: bold; }
+         *
+         * Recommended customizations:
+         *
+         *   - You may adjust [[selector_width]] to your liking.
          */
         'clean' => array
         (
