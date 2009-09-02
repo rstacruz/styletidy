@@ -972,11 +972,11 @@ class StCLI
             echo "\n";
             echo "Common usage examples:\n";
             echo "\n";
-            echo "  # Processes 'style.css with default settings\n";
+            echo "  # Processes 'style.css with default settings and shows the output in stdout\n";
             echo "  cat style.css | styletidy\n";
             echo "\n";
             echo "  # Processes 'style.css' with the 'clean' preset (with some options) and\n";
-            echo "  # spits the output in 'new.css'\n";
+            echo "  # spits the output out to 'new.css'\n";
             echo "  styletidy style.css preset=clean text_width=80 output=new.css\n";
             echo "\n";
             return;
