@@ -59,6 +59,8 @@ You can get basic usage info through:
 
     styletidy --help
 
-The StyleTidy manual (very crude at the moment!) can be accessed in:
-http://ricostacruz.com/styletidy/manual/
+The StyleTidy manual (very crude at the moment!) can be accessed here:
+[http://ricostacruz.com/styletidy/manual/](http://ricostacruz.com/styletidy/manual/)
+
+
 
