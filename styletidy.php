@@ -359,7 +359,7 @@ class StSettings
          * Lines up rules to occupy only one line each with just enough amount of whitespace.
          *
          * Example:
-         *   This is an example output of `styletidy preset=singleline`.
+         *   Below is a sample of output from `styletidy preset=singleline`.
          *
          *     /* Results * /
          *     #results-c { width: 800px; margin: 0 auto; }
@@ -396,7 +396,7 @@ class StSettings
          * A compact look with the selectors and definitions segregated into columns.
          *
          * Example:
-         *   This is an example output of `styletidy preset=clean`.
+         *   Below is a sample of output from `styletidy preset=clean`.
          *
          *     /* Item: description * /
          *     .description             { padding-bottom: 10px; }
@@ -423,6 +423,29 @@ class StSettings
 
         /* Preset: semicompact
          * The RSC-style
+         *
+         * Example:
+         *   Below is a sample of output from `styletidy preset=semicompact`.
+         *
+         *     #results .item a:hover
+         *      { text-decoration: none; }
+         *     
+         *     #results .item a:hover .title
+         *      { text-decoration: underline; }
+         *     
+         *     #results div.image
+         *      { padding-top: 10px; }
+         *     
+         *     #results .price
+         *      { color: #444; padding-top: 8px; font-weight: bold; font-size: 1.3em; }
+         *     
+         *     #results div.image img
+         *      { background: #ddd; padding: 4px; border: solid 1px #aaa; }
+         *     
+         *     #results div.image a:hover img
+         *      { background: #379; }
+         * 
+         *
          */
         'semicompact' => array
         (
