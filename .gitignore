@@ -3,4 +3,5 @@
 *.swo
 .sourcescribe_index
 doc/
+manual/
 styletidy.php
