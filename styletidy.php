@@ -1011,3 +1011,22 @@ class StCLI
 
 $c = new StCLI();
 $c->go();
+
+/* Page: StyleTidy Manual
+ * [No member list]
+ *
+ * Welcome:
+ *   Welcome to the StyleTidy manual! You can download StyleTidy from the
+ *   GitHub project page at [github.com/rstacruz/styletidy](http://github.com/rstacruz/styletidy).
+ *
+ * Contents:
+ *  1. [[General usage]]  
+ *     Basic usage.
+ *
+ *  2. [StyleTidy presets](##Presets)  
+ *     Various presets for StyleTidy.
+ *
+ *  2. [Configuring StyleTidy](##Options)  
+ *     Details on the various options that can be changed to adjust
+ *     StyleTidy's behavior.
+ */
