@@ -6,7 +6,7 @@
  * Page: General usage
  *
  * Usage:
- *     styletidy [preset=<preset>] [-debug] [OPTIONS]
+ *     styletidy [preset=<preset>] [-debug] [OPTIONS] [<input_file>] [output=<output_file>]
  *
  *   Refer to `styletidy --help` for a detailed list of options.
  *
@@ -911,6 +911,20 @@ class StCLI
         return $output;
     }
 
+    function crash($message = '')
+    {
+        /* Function: die()
+         * To be documented.
+         *
+         * Description:
+         *   To be documented.
+         */
+    
+        echo $message . "\n";
+        exit(1);
+        return;
+    }
+
     function go()
     {
         /* Function: go()
@@ -926,10 +940,14 @@ class StCLI
         {
             $css = new StyleTidy(''); 
             echo "I need somebody, help! Not just anyone but help!\n";
-            echo "Usage: styletidy [preset=<preset>] [-debug] [OPTIONS]\n";
+            echo "Usage: styletidy [preset=<preset>] [-debug] [OPTIONS] [<input_file>] [output=<output_file>]\n";
             echo "\n";
             echo "Common usage examples:\n";
             echo "  cat style.css | styletidy preset=clean > style2.css\n";
+            echo "\n";
+            echo "File options:\n";
+            echo "  input_file      The input filename. If not given, stdin is assumed.\n";
+            echo "  output_file     The filename to write to. If not given, stdout is assumed. (beta)\n";
             echo "\n";
             echo "Preset options:\n";
             echo "(Refer to the documentation for more information on each of "
@@ -952,7 +970,22 @@ class StCLI
             return;
         }
 
-        $input = file_get_contents('php://stdin');
+        $filename = 'php://stdin';
+
+        if ((isset($args['args'])) && (isset($args['args'][0])))
+        {
+            $filename = $args['args'][0];
+            if (!is_file($filename))
+                { return $this->crash("Cannot find file '$filename'."); }
+        }
+
+        if (isset($args['output']))
+        {
+            $this->output_file = $args['output'];
+            ob_start();
+        }
+
+        $input = file_get_contents($filename);
         $css = new StyleTidy($input);
 
         if (isset($args['preset']))
@@ -967,11 +1000,22 @@ class StCLI
 
         // Do it!
         $css->{$action}();
+
+        if (!is_null($this->output_file))
+        {
+            $out = ob_get_clean();
+            file_put_contents($this->output_file, $out);
+        }
     }
 
     /* Properties
      * ==================================================================== */
     
+    /* Property: $output_file
+     * The output filename. `NULL` if stdout.
+     */
+    var $output_file = NULL;
+
     /* Property: $css
      * String. The contents of the unparsed CSS.
      */
