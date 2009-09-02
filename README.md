@@ -55,6 +55,10 @@ you can simply do `git pull` to upgrade StyleTidy). You can do this by replacing
 Getting started
 ---------------
 
-Detailed help file to come.
+You can get basic usage info through:
 
     styletidy --help
+
+The StyleTidy manual (very crude at the moment!) can be accessed in:
+http://ricostacruz.com/styletidy/manual/
+
