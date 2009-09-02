@@ -939,27 +939,26 @@ class StCLI
         if (isset($args['help']))
         {
             $css = new StyleTidy(''); 
-            echo "I need somebody, help! Not just anyone but help!\n";
+            echo "StyleTidy\n";
             echo "Usage: styletidy [preset=<preset>] [-debug] [OPTIONS] [<input_file>] [output=<output_file>]\n";
             echo "\n";
-            echo "Common usage examples:\n";
-            echo "  cat style.css | styletidy preset=clean > style2.css\n";
+            echo "  All arguments are optional and may be given in any order.\n";
             echo "\n";
             echo "File options:\n";
             echo "  input_file      The input filename. If not given, stdin is assumed.\n";
             echo "  output_file     The filename to write to. If not given, stdout is assumed. (beta)\n";
             echo "\n";
             echo "Preset options:\n";
-            echo "(Refer to the documentation for more information on each of "
-                ."these presets.)\n";
             foreach ($css->presets as $preset => $v)
             {
                 echo "  preset=$preset\n";
             }
             echo "\n";
+            echo "  Refer to the documentation for more information on each of \n"
+                ."  the presets above. You may use these presets with the options\n"
+                ."  in the next section.\n";
+            echo "\n";
             echo "Options:\n";
-            echo "(Refer to the documentation for more information on each of "
-                ."these options.)\n";
             foreach ($css->options as $o => $value)
             {
                 $count = 31 - strlen($o);
@@ -967,6 +966,19 @@ class StCLI
                 $type = gettype($value);
                 echo "  $o=<value>" . str_repeat(' ', $count) . " $type\n";
             }
+            echo "\n";
+            echo "  Refer to the documentation for more information on each of \n"
+                ."  these options. You may include as many options as you wish.\n";
+            echo "\n";
+            echo "Common usage examples:\n";
+            echo "\n";
+            echo "  # Processes 'style.css with default settings\n";
+            echo "  cat style.css | styletidy\n";
+            echo "\n";
+            echo "  # Processes 'style.css' with the 'clean' preset (with some options) and\n";
+            echo "  # spits the output in 'new.css'\n";
+            echo "  styletidy style.css preset=clean text_width=80 output=new.css\n";
+            echo "\n";
             return;
         }
 
@@ -1056,7 +1068,8 @@ class StCLI
 $c = new StCLI();
 $c->go();
 
-/* Page: StyleTidy Manual
+/*
+ * Page: StyleTidy Manual
  * [No member list]
  *
  * Welcome:
