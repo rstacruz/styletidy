@@ -374,7 +374,8 @@ class StSettings
          *     #results .item a .title { display: block; }
          * 
          * Customizations:
-         *   - You can conserve whitespace If [[selector_compact]] is set to `0`.  
+         *   - You can conserve whitespace If [[property_compact]] is set to `0`.  
+         *     Example command: `styletidy preset=singleline property_compact=0`  
          *     Example output: `#results-c {width:800px;margin:0 auto;}`
          */
         'singleline' => array
