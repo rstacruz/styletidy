@@ -6,7 +6,7 @@
  * Page: General usage
  *
  * Usage:
- *     styletidy [OPTIONS]
+ *     styletidy [preset=<preset>] [-debug] [OPTIONS]
  *
  *   Refer to `styletidy --help` for a detailed list of options.
  *
@@ -925,7 +925,7 @@ class StCLI
         {
             $css = new StyleTidy(''); 
             echo "I need somebody, help! Not just anyone but help!\n";
-            echo "Usage: csstidy [preset=<preset>] [-debug] [OPTIONS]\n";
+            echo "Usage: styletidy [preset=<preset>] [-debug] [OPTIONS]\n";
             echo "\n";
             echo "Common usage examples:\n";
             echo "  cat style.css | styletidy preset=clean > style2.css\n";
