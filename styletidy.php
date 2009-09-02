@@ -1,19 +1,27 @@
 #!/usr/bin/php
 <?php
 /* StyleTidy
- * ==================================================================== */
+ * ======================================================================== */
 /*
  * Page: General usage
  *
  * Usage:
  *     styletidy [OPTIONS]
  */
-/* ==================================================================== */
+/* ======================================================================== */
 
 class StSettings
 {
     /* Page: Options
-     * Yeah
+     *
+     * Using options:
+     *   Put them as command line arguments.
+     *
+     * Example:
+     *   The following example will take an input file and reformats the code
+     *   without the comments.
+     *
+     *     styletidy show_comments=0
      */
 
     var $defaults = array
@@ -81,7 +89,14 @@ class StSettings
         'selector_indent' => 2,
 
         /* Option: selector_padding
-         *   Boolean. The end of selectors (just before the opening brace) will be
+         *   Boolean. Determines if the selectors should be padded with spaces
+         *   when [[brace_style]] is set to `compact`.
+         *
+         *
+         * Description:
+         *   This only applies of [[brace_style]] is set to `compact`.
+         *
+         *   The end of selectors (just before the opening brace) will be
          *   padded with spaces if this is `1`, with the number of spaces determined
          *   by `selector_width`.
          *
@@ -94,41 +109,67 @@ class StSettings
          *     
          * [Grouped under "Selector options"]
          */
-        'selector_padding' => TRUE,
+        'selector_padding' => FALSE,
 
-        // New lines in between selectors? (e.g.: "form, td" vs. "form,\ntd")
+        /* Option: selector_newline
+         *   Boolean. Each selector will be newlined.
+         *
+         * Description:
+         *   New lines in between selectors? (e.g.: "form, td" vs. "form,\ntd")
+         *
+         *   [[selector_conservative_newline]] will override this.
+         *
+         * Example:
+         *   This is an example of code with selector newline.
+         *
+         *     /* styletidy selector_newline=0 * /
+         *     #search form,
+         *     #search table,
+         *     #search .button span
+         *        { display: none; }
+         *
+         * See also:
+         *  - [[selector_conservative_newline]]
+         *
+         * [Grouped under "Selector options"]
+         */
         'selector_newline' => TRUE,
 
-        // New lines after each selector only if it's less than selector_width?
-        // This helps on selectors such as "td, tr, tbody, thead" where it may look weird
-        // if each element is placed on it's own line.
+        /* Option: selector_conservative_newline
+         *   Boolean.
+         *
+         * New lines after each selector only if it's less than selector_width?
+         * This helps on selectors such as "td, tr, tbody, thead" where it may look weird
+         * if each element is placed on it's own line.
+         *
+         * [Grouped under "Selector options"]
+         */
         'selector_conservative_newline' => TRUE,
 
         // Spaces in between selectors? (e.g., "form, td" vs. "form,td")
         'selector_compact' => FALSE,
 
-        // Should selector and definition be on their own lines?
-        // If set to false, this cancels out `selector_padding`.
-        'single_line_rules' => FALSE,
-
-        // NI: Kailangan ng property na magdedefine ng brace style. Madedeprecate neto yung
-        // single_line_rules. Consequently, `selector_padding` will be canceled out if this
-        // is set to anything other than 'compact'.
-        // [ compact | ownline | ansi | standard | whitesmith | banner ]
-        /*
-         * Standard:
+        /* Option: brace_style
+         * Le awesome.
+         *
+         * Valid values:
+         *     compact | ownline | ansi | standard | whitesmith | banner 
+         *
+         * Examples:
+         *
+         * Standard: 
          *     foo {
          *       bar
          *     }
          *
-         * Compact:
+         * Compact: 
          *     foo { bar }
          *
-         * Ownline:
+         * Ownline: 
          *     foo
          *     { bar }
          *
-         * ansi:
+         * ansi: 
          *     foo
          *     {
          *        bar
@@ -150,7 +191,7 @@ class StSettings
         'single_line_definitions' => FALSE,
 
         // How many spaces to indent the word-wrapped definitions.
-        // If `selector_padding` and `single_line_rules` are on, then this will be adjusted
+        // If `selector_padding` is on and `brace_style` is set to `compact`, then this will be adjusted
         // to account for `selector_width`.
         'definition_indent' => 3,
 
@@ -218,9 +259,21 @@ class StSettings
             'preset' => 'singleline',
             'text_width' => 120,
             'selector_width' => 24,
-        )
+        ),
+
+        /* Preset: semicompact
+         * The RSC-style
+         */
+        'semicompact' => array
+        (
+            'text_width' => 80,
+            'selector_width' => 40,
+            'single_line_definitions' => TRUE,
+            'brace_style' => 'ownline',
+        ),
     );
 }
+
 
 /* Class StyleTidy
  * ==================================================================== */
@@ -258,7 +311,7 @@ class StyleTidy
     {
         // If rules and definitions are in the own line, and selector_padding is on,
         // Adjust the definition_indent accordingly
-        if (($this->options['selector_padding']) && ($this->options['single_line_rules']))
+        if (($this->options['selector_padding']) && ($this->options['brace_style'] == 'compact'))
             { $this->options['definition_indent'] += $this->options['selector_width']; }
 	}
 
@@ -518,21 +571,38 @@ class StyleTidy
 					    { $this->e(","); }
 				}
 
-                // If selector_padding is on, pad it with spaces at the end.
-                if (!$this->options['single_line_rules'])
+                // Print the terminator of the selector.
+                // Put the definitions in another line.
+                if (in_array($this->options['brace_style'], array('ownline','ansi')))
                     { $this->e("\n"); }
 
-                elseif ($this->options['selector_padding'])
+                // Print the space here: ---v
+                //                 #search p {
+                elseif (in_array($this->options['brace_style'], array('standard')))
+                    { $this->e(" "); }
+
+                // If selector_padding is on, pad it with spaces at the end.
+                elseif (($this->options['brace_style'] == 'compact') &&
+                       ($this->options['selector_padding']))
                     { $this->pad($this->options['selector_width']); }
 			}
 
 			// Definition
 			elseif ($line['type'] == 'definition')
 			{
-				$this->e(str_repeat(' ', $this->options['brace_spaces_before']));
-				$this->e('{');
-                if (!$this->options['property_compact'])
-                    { $this->e(' '); }
+                // Print the opening brace.
+                // For 'compact' and 'newline', its pretty much the same.
+                // The \n for `newline` has already been accounted for by the selector.
+                if (in_array($this->options['brace_style'], array('compact', 'ownline')))
+                {
+                    $this->e(str_repeat(' ', $this->options['brace_spaces_before']));
+                    $this->e("{");
+                    if (!$this->options['property_compact'])
+                        { $this->e(' '); }
+                }
+                else {
+                    $this->e("{\n");
+                }
 
 				$i = 0;
 				foreach ($line['data'] as $property => $value)
@@ -576,8 +646,17 @@ class StyleTidy
                         { $this->e(';'); }
 				}
 
-                // End it...
-                if (!$this->options['property_compact'])
+                // Print the terminator. End it.
+                // Print the newline in here: ------------v
+                //            #search p {\n   (definition)\n}
+                if (in_array($this->options['brace_style'], array('standard', 'ansi')))
+                    { $this->e("\n"); }
+                
+                // Print the space in: -----------v
+                //        #search p { (definition) }
+                elseif ((in_array($this->options['brace_style'],
+                        array('compact','ownline')) &&
+                        (!$this->options['property_compact'])))
                     { $this->e(' '); }
 
 				$this->e('}');
@@ -663,7 +742,7 @@ class StCLI
         {
             $css = new StyleTidy(''); 
             echo "I need somebody, help! Not just anyone but help!\n";
-            echo "Usage: csstidy [preset=<preset>] [-debug] OPTIONS]\n";
+            echo "Usage: csstidy [preset=<preset>] [-debug] [OPTIONS]\n";
             echo "\n";
             echo "Common usage examples:\n";
             echo "  cat style.css | styletidy preset=clean > style2.css\n";
@@ -741,6 +820,7 @@ class StCLI
      */
     var $presets = array();
 }
+
 
 /* End
  * ==================================================================== */

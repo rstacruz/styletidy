@@ -26,7 +26,6 @@ Or even (the `verbose` preset):
        position:    absolute;
     }
 
-
 Many options are available so you can format your CSS code into any
 coding/intent convention you're used to.
 
