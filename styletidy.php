@@ -79,7 +79,7 @@ class StSettings
          *
          * Example:
          *   Below is sample output from running `styletidy preset=singleline
-         *   comment_newlines_before=2 comment_newlines_after=2`.
+         *    comment_newlines_before=2 comment_newlines_after=2`.
          *
          *     #results-c h3 span { float: left; color: #777; display: block; font-weight: normal; }
          *     #results-c h3 em { color: #666; font-style: normal; font-weight: bold; }
@@ -643,7 +643,8 @@ class StyleTidy
                 $first = ($i++ == 0) ? TRUE : FALSE; 
                 $space = $first ? 0 : 1;
 
-                if ($caret + $space + strlen($word) > $width)
+                // Don't word wrap when it's the first word!
+                if (($caret + $space + strlen($word) > $width) && (!$first))
                 {
                     $caret = strlen($word) + $indent;
                     $str .= "\n" . str_repeat(' ', $indent) . $word;
@@ -724,6 +725,8 @@ class StyleTidy
                     $first = ($i == 0) ? TRUE : FALSE; 
 					$last = ($i == count($line['selectors']) - 1) ? TRUE : FALSE;
 
+                    // Print the necessary separator characters per selector.
+                    // Obviously, this should only fire for the second item onwards.
                     if (!$first)
                     {
                         if ($this->options['selector_conservative_newline'])
@@ -739,6 +742,7 @@ class StyleTidy
                                 { $this->e(" "); }
                         }
 
+                        // `selector_conservative_newline` is off at this point
                         elseif ($this->options['selector_newline'])
                             { $this->e("\n"); }
                         elseif (!$this->options['selector_compact'])
@@ -913,7 +917,7 @@ class StCLI
 
     function crash($message = '')
     {
-        /* Function: die()
+        /* Function: crash()
          * To be documented.
          *
          * Description:
