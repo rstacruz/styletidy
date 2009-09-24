@@ -852,6 +852,16 @@ class StyleTidy
 			}
 		}
 	}
+
+
+    /* Output
+     * ==================================================================== */
+    
+    /* Property: $output
+     * To be documented.
+     */
+    var $output;
+
 }
 
 
@@ -900,9 +910,9 @@ class StCLI
         $output['args'] = array();
         foreach ($argslist as $args)
         {
-            $flag  = '(?:--?(?<flag>[a-zA-Z0-9\-\_]+))';
-            $kv    = '(?:(?<kv>(?:[a-zA-Z0-9\-\_]+)=(?:.*)))';
-            $word  = '(?:(?<word>.*))';
+            $flag  = '(?:--?(?P<flag>[a-zA-Z0-9\-\_]+))';
+            $kv    = '(?:(?P<kv>(?:[a-zA-Z0-9\-\_]+)=(?:.*)))';
+            $word  = '(?:(?P<word>.*))';
             preg_match_all("~^$flag|$kv|$word\$~", $args, $m);
         
             foreach ($m['flag'] as $flag) if ($flag != '')
@@ -1023,6 +1033,7 @@ class StCLI
             file_put_contents($this->output_file, $out);
         }
     }
+
 
     /* Properties
      * ==================================================================== */
